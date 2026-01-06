@@ -1,0 +1,52 @@
+dataset:
+  name: iris
+  source: sklearn
+  task: classification
+  num_classes: 3
+
+  preprocessing:
+    normalize: true
+
+  split:
+    test_size: 0.30
+    random_state: 42
+    stratify: true
+
+
+model:
+  type: logistic_regression
+
+  hyperparameters:
+    C: 1.0
+    solver: lbfgs
+    max_iter: 1000
+
+
+degradation:
+  type: missingness
+  mechanism: MNAR   # MCAR or MAR or MNAR
+
+  levels:
+    - 0.0
+    - 0.05
+    - 0.10
+    - 0.20
+    - 0.30
+
+  mar:
+    conditioning_feature: 2  # petal length (biologically meaningful)
+
+
+experiment:
+  seeds: [0, 1, 2, 3, 4]
+
+
+metrics:
+  - accuracy
+  - expected_calibration_error
+  - confidence_correctness_gap
+
+
+output:
+  directory: results/iris
+  experiment_name: mnar
