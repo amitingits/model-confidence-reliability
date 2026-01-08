@@ -5,9 +5,16 @@
 
 ---
 
-## 1. What Problem This Project Solves (Formal)
+## 1. The Core Problem
 
-A deployed machine learning system produces **predictions** and **confidence scores**.
+Modern machine learning models do not just make predictions — they also report **confidence** in those predictions.
+In many real systems (healthcare, finance, security), decisions are made not only based on *what* the model predicts, but **how confident it claims to be**.
+However, a critical and often untested assumption is:
+
+> *If a model is confident, it is likely correct.*
+
+This assumption is **not guaranteed**, especially when data quality degrades in real-world environments.
+
 The core question studied is:
 
 ![Core Question](https://latex.codecogs.com/svg.image?\hat{P}(\text{correct}\mid&space;x)\approx&space;P(\text{correct}\mid&space;x)) still hold when data quality degrades?
@@ -19,11 +26,17 @@ The core question studied is:
 
 This equality is **assumed**, but rarely **tested under degraded data**.
 
+> **This project studies how the relationship between model confidence and actual correctness degrades as data quality deteriorates in controlled, measurable ways.**
+
+It is not about building better models.
+It is about **measuring trustworthiness**.
+
 ---
 
 ## 2. Mathematical Setup (Foundation)
 
 ### Dataset
+The study is built upon a dataset defined as:
 
 ![Dataset](https://latex.codecogs.com/svg.image?\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n,&space;\qquad&space;x_i\in\mathbb{R}^d,&space;\qquad&space;y_i\in\{1,\dots,K\})
 
@@ -36,7 +49,7 @@ This equality is **assumed**, but rarely **tested under degraded data**.
 ---
 
 ### Trained Probabilistic Classifier
-
+We utilize a probabilistic classifier $f_\theta$ that maps input features to a probability simplex:
 
 ![Classifier](https://latex.codecogs.com/svg.image?f_\theta:\mathbb{R}^d\rightarrow\Delta^{K-1})
 
@@ -50,125 +63,179 @@ This equality is **assumed**, but rarely **tested under degraded data**.
 
 ---
 
-## 3. Law 1 — Confidence Is a Statistical Claim
+## 3. The Three Fundamental “Laws” of the Project
 
-### Prediction
+The entire project is governed by three strict principles.
+Every architectural decision enforces them.
 
-![Prediction](https://latex.codecogs.com/svg.image?\hat{y}_i=\arg\max_k\hat{p}_{ik})
+### **Law 1: Confidence Is a Quantitative Claim**
 
-### Confidence
+A model’s confidence is **not a feeling or heuristic**.
+It is a **numerical probability**.
 
-![Confidence](https://latex.codecogs.com/svg.image?c_i=\max_k\hat{p}_{ik})
+If a model outputs:
+* “Class A with probability 0.92”
+Then it is implicitly claiming:
 
-**Interpretation**
+> *Out of many similar cases, I should be correct roughly 92% of the time.*
 
-![Formula](https://latex.codecogs.com/svg.image?P(\hat{y}_i=y_i|c_i\approx0.87)\approx0.87)
+This project treats confidence as a **statistical promise**, not a cosmetic number.
+To evaluate this claim, we define the following mathematical objects:
+
+**1. The Prediction ($\hat{y}_i$)**
+The model selects the class with the highest predicted probability:
+$$\hat{y}_i = \arg\max_k \hat{p}_{ik}$$
+
+**2. The Confidence Score ($c_i$)**
+The confidence associated with that prediction is the magnitude of the maximum predicted probability:
+$$c_i = \max_k \hat{p}_{ik}$$
+
+**3. The Interpretation of Reliability**
+This project treats confidence as a **statistical promise**, not a cosmetic number. A model is considered perfectly reliable if the empirical probability of being correct matches the claimed confidence:
+
+$$P(\hat{y}_i = y_i \mid c_i \approx 0.87) \approx 0.87$$
+
 
 Confidence is a **probabilistic promise**, not a heuristic.
 
 ---
 
-## 4. Law 2 — Correctness Is Empirical
+## 4. Law 2: Correctness Is Empirical
+Correctness is defined **only** by comparison with ground truth.
 
-Correctness is not **inferred**, it is **measured**:
+A prediction is:
 
+* Correct → 1
+* Incorrect → 0
 
-![Correctness](https://latex.codecogs.com/svg.image?z_i%3D%5Cbegin%7Bcases%7D1%26%5Ctext%7B%20if%20%7D%5Chat%7By%7D_i%3Dy_i%5C%5C0%26%5Ctext%7B%20otherwise%7D%5Cend%7Bcases%7D)
+There is no partial credit, no interpretation.
 
-Correctness is a **Bernoulli** random variable:
+This allows confidence (a probabilistic belief) to be compared against correctness (a binary outcome) **mathematically**.
 
-![Bernoulli](https://latex.codecogs.com/svg.image?z_i\sim\mathrm{Bernoulli}(P(\text{correct})))
+**1. The Correctness Indicator ($z_i$)**
+We define a binary variable to represent the accuracy of a single prediction:
+
+$$z_i = \begin{cases} 1 & \text{if } \hat{y}_i = y_i \\ 0 & \text{otherwise} \end{cases}$$
+
+**2. The Statistical Nature of Correctness**
+Correctness is treated as a **Bernoulli** random variable, allowing confidence (a probabilistic belief) to be compared against correctness (a binary outcome) mathematically:
+
+$$z_i \sim \mathrm{Bernoulli}(P(\text{correct}))$$
 
 ---
 
 ## 5. Law 3 — Reliability Under Degradation
+Reliability is not a static property; it is a function of data quality. This project assumes that a model reliable only on clean data is not truly reliable. 
 
-![Degradation Operator](https://latex.codecogs.com/svg.image?\mathcal{T}_d:\(X,Y\)\rightarrow\(X^{\(d\)},Y^{\(d\)}\))
+We define a **Degradation Operator** $\mathcal{T}_d$ that transforms clean data $(X, Y)$ into degraded data $(X^{(d)}, Y^{(d)})$ based on a severity parameter $d$:
 
-**where:**
+$$\mathcal{T}_d: (X, Y) \rightarrow (X^{(d)}, Y^{(d)})$$
 
-* ![\mathcal{T}\_0](https://latex.codecogs.com/svg.image?\mathcal{T}_0) is the identity operator
-* ![d\uparrow](https://latex.codecogs.com/svg.image?d\uparrow) implies increasing degradation
-* ![f\_\theta](https://latex.codecogs.com/svg.image?f_\theta) is fixed ∀ ![d](https://latex.codecogs.com/svg.image?d)
+**Where:**
+* **$\mathcal{T}_0$**: is the identity operator (clean data).
+* **$d \uparrow$**: implies increasing degradation severity.
+* **$f_\theta$**: the model remains frozen $\forall d$, simulating real-world silent degradation.
+
+Therefore, reliability is tested **only under controlled degradation**.
+
+---
+## 6. Degradation & Noise Layer
+
+The project simulates three primary modes of data failure to test when the confidence-accuracy assumption breaks.
+
+### Missingness Models (Information Loss)
+1. **MCAR (Missing Completely at Random):** Data disappears unpredictably.
+   $$P(x_{ij}^{(d)} = \text{NaN}) = p_d$$
+2. **MAR (Missing at Random):** Data disappears based on observed context.
+   $$P(x_{ij}^{(d)} = \text{NaN} \mid x_{ik}) = \sigma(\alpha_d x_{ik})$$
+3. **MNAR (Missing Not at Random):** Extreme or sensitive values disappear, often the most dangerous mode.
+   $$x_{ij}^{(d)} = \begin{cases} \text{NaN} & \text{if } x_{ij} \ge Q_{1-d}(x_j) \\ x_{ij} & \text{otherwise} \end{cases}$$
+
+### Noise & Bias Models
+* **Feature Noise (Measurement Error):** Simulates sensor inaccuracy.
+  $$x_i^{(d)} = x_i + \epsilon, \quad \epsilon \sim \mathcal{N}(0, \sigma_d^2 I)$$
+* **Label Noise:** Simulates human entry errors or mislabeling.
+  $$y_i^{(d)} = \begin{cases} \text{Uniform}(\{1, \dots, K\}) & \text{w.p. } \eta_d \\ y_i & \text{otherwise} \end{cases}$$
+* **Structural Bias:** Asymmetric reliability failure where some groups are affected more than others.
+  $$P(\mathcal{T}_d(x) \mid y=k_1) \neq P(\mathcal{T}_d(x) \mid y=k_2)$$
 
 ---
 
-## 6. Degradation Models
+## 7. Model Layer: Why Models Are Frozen
 
-### MCAR
+Models are trained **once** on clean data and then frozen forever.
 
-![MCAR](https://latex.codecogs.com/svg.image?P(x_{ij}^{(d)}=\text{NaN})=p_d)
+This is intentional.
 
-### MAR
+Why?
 
-![MAR](https://latex.codecogs.com/svg.image?P(x_{ij}^{(d)}=\text{NaN}\mid&space;x_{ik})=\sigma(\alpha_d&space;x_{ik}))
+Because in real deployment:
 
-### MNAR
+* Models are rarely retrained immediately
+* Data quality often degrades silently
+* Confidence outputs are still trusted
 
-![MNAR](https://latex.codecogs.com/svg.image?x_{ij}^{(d)}%3D%5Cbegin%7Bcases%7D%5Ctext%7BNaN%7D%20%26%20x_{ij}%5Cge%20Q_{1-d}(x_j)%20%5C%5C%20x_{ij}%20%26%20%5Ctext%7Botherwise%7D%5Cend%7Bcases%7D)
----
+This layer answers:
 
-## 7. Noise Models
-
-### Feature Noise
-
-![Feature Noise](https://latex.codecogs.com/svg.image?x_i^{(d)}=x_i+\epsilon,\;\epsilon\sim\mathcal{N}(0,\sigma_d^2I))
-
-
-### Label Noise
-
-![Label Noise](https://latex.codecogs.com/svg.image?y_i^{(d)}%3D%5Cbegin%7Bcases%7D%5Ctext%7BUniform%7D(%5C%7B1%2C%5Cdots%2CK%5C%7D)%26%5Ctext%7Bw.p.%20%7D%5Ceta_d%5C%5Cy_i%26%5Ctext%7Botherwise%7D%5Cend%7Bcases%7D)
+> *What happens when a trusted model is exposed to untrusted data?*
 
 ---
 
-## 8. Bias Models
+## 8. Measurement Layer
 
-![Bias](https://latex.codecogs.com/svg.image?P(%5Cmathcal%7BT%7D_d(x)%5Cmid%20y%3Dk_1)%5Cneq%20P(%5Cmathcal%7BT%7D_d(x)%5Cmid%20y%3Dk_2))
+To scientifically quantify reliability, the project employs three complementary metrics that track how the model's internal beliefs deviate from external reality.
 
-Bias causes **asymmetric reliability failure**.
+### Accuracy (Empirical Performance)
+Measures the proportion of correct predictions at a specific degradation level $d$:
 
----
+$$\mathrm{Acc}(d) = \frac{1}{n} \sum_{i=1}^n z_i^{(d)}$$
 
-## 9. Measurement Layer
+### Expected Calibration Error (ECE)
+Quantifies how far the model's predicted confidence deviates from its actual accuracy across $M$ probability bins:
 
-### Accuracy
+$$\mathrm{ECE}(d) = \sum_{m=1}^M \frac{|B_m|}{n} \left| \mathrm{acc}(B_m) - \mathrm{conf}(B_m) \right|$$
 
-![Accuracy](https://latex.codecogs.com/svg.image?\mathrm{Acc}(d)=\frac{1}{n}\sum_{i=1}^nz_i^{(d)})
 
----
 
-### Expected Calibration Error
+### Confidence–Correctness Gap ($\Delta$)
+The central failure signal of this study. It measures the systematic difference between the expected confidence and the expected correctness:
 
-![ECE](https://latex.codecogs.com/svg.image?\mathrm{ECE}(d)=\sum_{m=1}^M\frac{|B_m|}{n}\left|\mathrm{acc}(B_m)-\mathrm{conf}(B_m)\right|)
+$$\Delta(d) = \mathbb{E}[c_i^{(d)}] - \mathbb{E}[z_i^{(d)}]$$
 
----
-
-### Confidence–Correctness Gap
-
-![Gap](https://latex.codecogs.com/svg.image?\Delta(d)=\mathbb{E}[c_i^{(d)}]-\mathbb{E}[z_i^{(d)}])
-
-**where:**
-
-* ![\Delta(d)>0](https://latex.codecogs.com/svg.image?\Delta\(d\)>0) → overconfidence
-* ![\Delta(d)=0](https://latex.codecogs.com/svg.image?\Delta\(d\)=0) → reliable
-* ![\Delta(d)<0](https://latex.codecogs.com/svg.image?\Delta\(d\)<0) → underconfidence
+**Interpretation of the Gap:**
+* **$\Delta(d) > 0$**: **Overconfidence** — The model believes it is more accurate than it actually is (Safety Risk).
+* **$\Delta(d) = 0$**: **Perfectly Reliable** — The model is "honest" about its uncertainty.
+* **$\Delta(d) < 0$**: **Underconfidence** — The model is more accurate than it claims to be.
 
 ---
 
-## 10. Statistical Laws
+## 9. Statistical Layer
 
-### Bootstrap CI
+Single numbers are meaningless.
 
-![Bootstrap](https://latex.codecogs.com/svg.image?\mathrm{CI}_{95\%}=[Q_{0.025},Q_{0.975}])
+Therefore:
 
+* Every metric is computed across multiple random seeds
+* Uncertainty is estimated using resampling
+* Trends are tested statistically, not visually
 
-### Monotonicity
+This ensures that conclusions are **not artifacts of randomness**.
 
-![Spearman](https://latex.codecogs.com/svg.image?\rho=\mathrm{Spearman}(d,\mathrm{ECE}(d)))
+To ensure the results are not artifacts of randomness, we apply rigorous statistical validation.
 
----
+### Bootstrap Confidence Intervals (CI)
+We estimate the uncertainty of our metrics by resampling the data and calculating the 95% confidence interval using the 2.5th and 97.5th percentiles of the bootstrap distribution:
 
-## 11. Architecture as Law Enforcement
+$$\mathrm{CI}_{95\%} = [Q_{0.025}, Q_{0.975}]$$
+
+### Monotonicity of Failure
+We measure the relationship between the severity of degradation ($d$) and the increase in Calibration Error using the Spearman rank correlation coefficient:
+
+$$\rho = \mathrm{Spearman}(d, \mathrm{ECE}(d))$$
+
+A high $\rho$ indicates that as data quality drops, the model's reliability fails in a predictable, systematic way.
+
+## 10. Architecture as Law Enforcement
 
 | Folder        | Mathematical Object                                                              |
 | ------------- | -------------------------------------------------------------------------------- |
@@ -180,17 +247,34 @@ Bias causes **asymmetric reliability failure**.
 
 ---
 
-## 12. Formal Result
+## 11. Formal Result
 
-![Failure](https://latex.codecogs.com/svg.image?%5Cexists%20d%3A%5Cmathbb%7BE%7D%5Bc_i%5E%7B(d)%7D%5D%5Cgg%5Cmathbb%7BE%7D%5Bz_i%5E%7B(d)%7D%5D)
+The project demonstrates the existence of **Silent Failure**:
+
+$$\exists d : \mathbb{E}[c_i^{(d)}] \gg \mathbb{E}[z_i^{(d)}]$$
+
+This proves that as data quality ($d$) degrades, a model can remain highly confident while its actual correctness collapses.
 
 A model can be **confidently wrong**.
 
 ---
 
-## 13. One-Line Summary
+## 12. One-Line Summary
 
-![Reliability](https://latex.codecogs.com/svg.image?\mathrm{Reliability}(d)=\left|\mathbb{E}[c_i^{(d)}]-\mathbb{E}[z_i^{(d)}]\right|)
+At its core, this project defines and measures **Reliability** as a function of data degradation ($d$):
 
-Studied as ![d\uparrow](https://latex.codecogs.com/svg.image?d\uparrow).
+$$\mathrm{Reliability}(d) = \left| \mathbb{E}[c_i^{(d)}] - \mathbb{E}[z_i^{(d)}] \right|$$
 
+We study this relationship as $d \uparrow$ (severity increases) to determine the exact point where a model's statistical promise stops being meaningful.
+
+> **Project Mission:** To measure when and why machine learning models stop being honest about their own uncertainty as data quality deteriorates.
+
+## 14. Why This Project Matters
+
+Because in real systems:
+
+* Overconfident models cause harm
+* Silent data degradation is common
+* Confidence is trusted more than it should be
+
+This project provides a **systematic, mathematical way to test that trust**.

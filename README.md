@@ -1,284 +1,27 @@
-# Project Explanation
+# Model Confidence vs Data Quality: A Reliability Engineering Study
 
-## *Model Confidence vs Data Quality: A Reliability Engineering Study*
+## 1. Project Overview
 
----
+Modern machine learning models report **confidence** in their predictions, yet in real-world environments (healthcare, finance, security), this confidence often becomes untrustworthy as data quality degrades.
 
-## 1. The Core Problem
+This project provides a systematic, mathematical framework to test the assumption: *“If a model is confident, it is likely correct”*. Rather than building "better" models, this study focuses on **measuring trustworthiness** by observing how a model's statistical promises hold up under controlled data failure.
 
-Modern machine learning models do not just make predictions — they also report **confidence** in those predictions.
+### The Three Laws of the Project
 
-In many real systems (healthcare, finance, security), decisions are made not only based on *what* the model predicts, but **how confident it claims to be**.
+1. **Confidence is a Quantitative Claim:** A model's output (e.g., 0.92 probability) is treated as a statistical promise of accuracy.
+2. **Correctness is Empirical:** Accuracy is defined strictly by comparison with ground truth; there is no partial credit.
+3. **Reliability Must Be Tested Under Degradation:** A model is only truly reliable if its confidence remains calibrated when faced with noise, bias, or missing information.
 
-However, a critical and often untested assumption is:
+### The Conceptual Framework
 
-> *If a model is confident, it is likely correct.*
+The project operates across four isolated layers to ensure scientific integrity:
 
-This assumption is **not guaranteed**, especially when data quality degrades in real-world environments.
+* **Data Layer:** Clean, frozen datasets.
+* **Degradation Layer:** Mathematical operators (Missingness, Noise, Bias) that simulate real-world failure.
+* **Model Layer:** Frozen classifiers trained only on clean data.
+* **Measurement Layer:** Quantifying the **Confidence–Correctness Gap** and Expected Calibration Error (ECE).
 
-This project exists to **systematically test and quantify when that assumption breaks**.
-
----
-
-## 2. The Central Idea in One Sentence
-
-> **This project studies how the relationship between model confidence and actual correctness degrades as data quality deteriorates in controlled, measurable ways.**
-
-It is not about building better models.
-It is about **measuring trustworthiness**.
-
----
-
-## 3. The Three Fundamental “Laws” of the Project
-
-The entire project is governed by three strict principles.
-Every architectural decision enforces them.
-
----
-
-### **Law 1: Confidence Is a Quantitative Claim**
-
-A model’s confidence is **not a feeling or heuristic**.
-It is a **numerical probability**.
-
-If a model outputs:
-
-* “Class A with probability 0.92”
-
-Then it is implicitly claiming:
-
-> *Out of many similar cases, I should be correct roughly 92% of the time.*
-
-This project treats confidence as a **statistical promise**, not a cosmetic number.
-
----
-
-### **Law 2: Correctness Is Empirical, Not Assumed**
-
-Correctness is defined **only** by comparison with ground truth.
-
-A prediction is:
-
-* Correct → 1
-* Incorrect → 0
-
-There is no partial credit, no interpretation.
-
-This allows confidence (a probabilistic belief) to be compared against correctness (a binary outcome) **mathematically**.
-
----
-
-### **Law 3: Reliability Must Be Tested Under Degradation**
-
-Most models are evaluated only on **clean, ideal datasets**.
-
-Real systems face:
-
-* Missing data
-* Noisy measurements
-* Systematic bias
-* Distribution shift
-
-This project assumes:
-
-> *A model that is reliable only on clean data is not reliable at all.*
-
-Therefore, reliability is tested **only under controlled degradation**.
-
----
-
-## 4. What This Project Is *Not*
-
-To avoid confusion, this project is **explicitly not**:
-
-* A robustness training project
-* A data augmentation project
-* A deep learning benchmark
-* A performance optimization study
-* An LLM-based system
-
-No models are retrained to “fix” the damage.
-We measure **failure**, not prevention.
-
----
-
-## 5. The Conceptual Model (High Level)
-
-The project consists of **four conceptual layers**:
-
-```
-Data → Degradation → Frozen Model → Reliability Measurement
-```
-
-Each layer has a strict role and **cannot influence the others**.
-
----
-
-## 6. Data Layer: What Is Being Studied
-
-The data layer provides **clean, well-understood datasets**:
-
-* Structured features
-* Known labels
-* Standard preprocessing
-
-The datasets are split **once**, and the test set is frozen permanently.
-
-Why this matters:
-
-* Any later change in results can only be attributed to **data degradation**, not data leakage or retraining artifacts.
-
----
-
-## 7. Degradation Layer: How Reality Is Simulated
-
-This is the **most important layer** of the project.
-
-Instead of vague corruption, degradation is defined as **mathematical operators** with a severity parameter.
-
-Each degradation answers a specific real-world question.
-
----
-
-### 7.1 Missingness (Information Loss)
-
-Simulates:
-
-* Sensor failure
-* Incomplete records
-* Human non-response
-
-Three types are modeled:
-
-1. **Random missingness** – data disappears unpredictably
-2. **Conditioned missingness** – data disappears based on context
-3. **Value-dependent missingness** – extreme or sensitive values disappear
-
-Each type represents a different **failure mode** seen in production systems.
-
----
-
-### 7.2 Noise (Measurement Error)
-
-Simulates:
-
-* Sensor inaccuracy
-* Manual entry errors
-* Environmental disturbance
-
-Noise is injected gradually, allowing us to ask:
-
-> *Does confidence degrade smoothly, or does it remain high while accuracy collapses?*
-
-This distinction is critical for safety.
-
----
-
-### 7.3 Bias (Structural Distortion)
-
-Simulates:
-
-* Unequal data quality across groups
-* Skewed sampling
-* Operational discrimination
-
-Bias is introduced **asymmetrically**, meaning some groups are affected more than others.
-
-This allows the project to study **confidence failure that looks acceptable in aggregate but is dangerous locally**.
-
----
-
-## 8. Model Layer: Why Models Are Frozen
-
-Models are trained **once** on clean data and then frozen forever.
-
-This is intentional.
-
-Why?
-
-Because in real deployment:
-
-* Models are rarely retrained immediately
-* Data quality often degrades silently
-* Confidence outputs are still trusted
-
-This layer answers:
-
-> *What happens when a trusted model is exposed to untrusted data?*
-
----
-
-## 9. Confidence Extraction: What the Model Claims
-
-For every prediction, the model provides:
-
-* A predicted class
-* A confidence score (maximum predicted probability)
-
-This confidence is treated as a **claim about reliability**, not as an auxiliary output.
-
-No thresholding. No heuristics.
-
----
-
-## 10. Measurement Layer: How Reliability Is Quantified
-
-This is where the project becomes **scientific**.
-
-Instead of asking “Is the model good?”, the project asks:
-
-> *Is the model honest about its own uncertainty?*
-
-To answer this, three complementary measurements are used:
-
----
-
-### 10.1 Accuracy (Baseline Reality)
-
-Measures how often the model is correct.
-
-Important but insufficient.
-
----
-
-### 10.2 Calibration Error (Confidence vs Reality)
-
-Measures how far predicted confidence deviates from empirical correctness.
-
-This answers:
-
-> *When the model says 80% confident, is it actually correct 80% of the time?*
-
----
-
-### 10.3 Confidence–Correctness Gap (Core Signal)
-
-Measures the **systematic difference** between:
-
-* What the model believes
-* What actually happens
-
-This gap is the **failure signal**.
-
-A growing gap indicates **overconfidence**, which is far more dangerous than low accuracy.
-
----
-
-## 11. Statistical Layer: Why Results Are Trustworthy
-
-Single numbers are meaningless.
-
-Therefore:
-
-* Every metric is computed across multiple random seeds
-* Uncertainty is estimated using resampling
-* Trends are tested statistically, not visually
-
-This ensures that conclusions are **not artifacts of randomness**.
-
----
-
-## 12. Project Architecture: Why It Looks the Way It Does
+### Project Architecture: Why It Looks the Way It Does
 
 The directory structure is not cosmetic.
 
@@ -294,9 +37,7 @@ No folder is allowed to “cheat” by accessing another improperly.
 
 This mirrors **scientific experimental isolation**.
 
----
-
-## 13. What This Project Ultimately Demonstrates
+### What This Project Ultimately Demonstrates
 
 At the end, the project answers:
 
@@ -308,22 +49,112 @@ At the end, the project answers:
 
 These are **deployment-critical questions**, not academic curiosities.
 
----
-
-## 14. Why This Project Matters
-
-Because in real systems:
-
-* Overconfident models cause harm
-* Silent data degradation is common
-* Confidence is trusted more than it should be
-
-This project provides a **systematic, mathematical way to test that trust**.
-
----
-
-## 15. If You Had to Explain It in One Line
+### If You Had to Explain It in One Line
 
 > *This project measures when and why machine learning models stop being honest about their own uncertainty as data quality deteriorates.*
 
 ---
+
+## 2. Getting Started
+
+### Prerequisites
+
+* Python 3.9+
+* Key Libraries: `numpy`, `pandas`, `scikit-learn`, `matplotlib`, `scipy`
+
+### Installation
+
+**1. Clone the repository:**
+```bash
+git clone https://github.com/amitingits/model-confidence-reliability.git
+cd model-confidence-reliability
+```
+**2. Create Virtual Python Environment:**
+```bash
+python -m venv <env-name>
+```
+For windows
+```bash
+ <env-name>/Scripts/activate
+```
+For Linux/MacOS
+```bash
+ source <env-name>/bin/activate
+```
+Replace the `<env-name>` with your actual environment name.
+
+**3. Install dependencies:**
+```bash
+pip install -r requirements.txt
+```
+### Running a Test
+
+The project uses YAML configurations to manage degradation types. To run an experiment, modify the `mechanism` and `experiment_name` in the `/experiments/iris.yaml file`
+
+```bash
+# /experiments/iris.yaml 
+
+degradation:
+  type: missingness
+  mechanism: MNAR   # MCAR or MAR or MNAR
+
+output:
+  directory: results/iris
+  experiment_name: mnar     # MCAR or MAR or MNAR (in small letters)
+```
+
+Run `run_experiment.py` file to run the experiments.
+
+```bash
+python run_experiment.py --config experiments/iris.yaml   # MCAR (experiment_name: mcar)
+python run_experiment.py --config experiments/iris.yaml   # MAR  (experiment_name: mar)
+python run_experiment.py --config experiments/iris.yaml   # MNAR (experiment_name: mnar)
+```
+Then:
+```bash
+python analysis/compare_mcar_mar_mnar.py
+```
+
+To execute bootstrap analysis, run:
+```bash
+python analysis/bootstrap_tables.py --experiment mcar
+python analysis/bootstrap_tables.py --experiment mar
+python analysis/bootstrap_tables.py --experiment mnar
+```
+Then:
+```bash
+python analysis/compare_bootstrap_3way.py
+```
+
+The Experiment Results will be generated in the following directory: `/output`
+
+---
+
+## 3. Key Results & Analysis
+
+The following plot demonstrates how different data degradation mechanisms (MCAR, MAR, MNAR) impact the model's reliability gap. This visual confirms that as information loss increases, the model's internal "statistical promise" (confidence) diverges from empirical reality (accuracy).
+
+![Comparison of Missingness Mechanisms](./results/iris/comparison/plots/gap_comparison_3way.png)
+
+**Key Takeaways:**
+* **Calibration Decay:** As data quality deteriorates, the gap between model confidence and actual accuracy expands significantly.
+* **Mechanism Sensitivity:** Certain degradations, specifically **MNAR (Missing Not At Random)**, cause the model to remain dangerously overconfident despite a total collapse in accuracy.
+* **The Reliability Gap:** This project quantifies the "Overconfidence Risk" that occurs when models encounter silent data degradation in production.
+
+---
+
+### Adding Your Own Components - Extensibility and Reusability
+
+* **New Datasets:** The Current Project works on Iris Dataset. You can add your own datasets to the `/data` folder and update the data loader `/data/loaders.py`.
+* **New Models:** Place any Scikit-Learn compatible model in the `/models` directory. The framework will automatically extract confidence scores using `.predict_proba()`.
+* **Custom Degradation:** Add new functions to `/corruption`. Every function must accept a `severity` parameter () to represent the level of data decay.
+
+### Technical Deep Dive
+
+To understand the mathematical framework, statistical laws, and formal definitions governing this study deeply, you can definitely checkout the detailed documentation:
+
+-> **[View the Math Behind It](./math-behind-it.md)**
+
+### Credits & Authorship:
+* **Author: Amit Das**
+* **Role:** Data Science Undergraduate

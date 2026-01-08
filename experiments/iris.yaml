@@ -49,4 +49,4 @@ metrics:
 
 output:
   directory: results/iris
-  experiment_name: mnar
+  experiment_name: mnar     # MCAR or MAR or MNAR (in small letters)
