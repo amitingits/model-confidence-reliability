@@ -84,10 +84,12 @@ To evaluate this claim, we define the following mathematical objects:
 
 **1. The Prediction ($\hat{y}_i$)**
 The model selects the class with the highest predicted probability:
-$$\hat{y}_i = \arg\max_k \hat{p}_{ik}$$
+
+![Prediction](https://latex.codecogs.com/svg.image?\hat{y}_i=\arg\max_k\hat{p}_{ik})
 
 **2. The Confidence Score ($c_i$)**
 The confidence associated with that prediction is the magnitude of the maximum predicted probability:
+
 $$c_i = \max_k \hat{p}_{ik}$$
 
 **3. The Interpretation of Reliability**
