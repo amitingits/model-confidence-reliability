@@ -154,7 +154,7 @@ The project simulates three primary modes of data failure to test when the confi
 
 3. **MNAR (Missing Not at Random):** Extreme or sensitive values disappear, often the most dangerous mode.
 
-   $$x_{ij}^{(d)} = \begin{cases} \text{NaN} & \text{if } x_{ij} \ge Q_{1-d}(x_j) \\ x_{ij} & \text{otherwise} \end{cases}$$
+   ![MNAR](https://latex.codecogs.com/svg.image?x_{ij}^{(d)}%3D%5Cbegin%7Bcases%7D%5Ctext%7BNaN%7D%20%26%20x_{ij}%5Cge%20Q_{1-d}(x_j)%20%5C%5C%20x_{ij}%20%26%20%5Ctext%7Botherwise%7D%5Cend%7Bcases%7D)
 
 
 ### Noise & Bias Models
@@ -164,7 +164,7 @@ The project simulates three primary modes of data failure to test when the confi
 
 * **Label Noise:** Simulates human entry errors or mislabeling.
 
-  $$y_i^{(d)} = \begin{cases} \text{Uniform}(\{1, \dots, K\}) & \text{w.p. } \eta_d \\ y_i & \text{otherwise} \end{cases}$$
+  ![Label Noise](https://latex.codecogs.com/svg.image?y_i^{(d)}%3D%5Cbegin%7Bcases%7D%5Ctext%7BUniform%7D(%5C%7B1%2C%5Cdots%2CK%5C%7D)%26%5Ctext%7Bw.p.%20%7D%5Ceta_d%5C%5Cy_i%26%5Ctext%7Botherwise%7D%5Cend%7Bcases%7D)
 
 * **Structural Bias:** Asymmetric reliability failure where some groups are affected more than others.
 
