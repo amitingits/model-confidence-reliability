@@ -145,19 +145,31 @@ The project simulates three primary modes of data failure to test when the confi
 
 ### Missingness Models (Information Loss)
 1. **MCAR (Missing Completely at Random):** Data disappears unpredictably.
+
    $$P(x_{ij}^{(d)} = \text{NaN}) = p_d$$
+
 2. **MAR (Missing at Random):** Data disappears based on observed context.
+
    $$P(x_{ij}^{(d)} = \text{NaN} \mid x_{ik}) = \sigma(\alpha_d x_{ik})$$
+
 3. **MNAR (Missing Not at Random):** Extreme or sensitive values disappear, often the most dangerous mode.
+
    $$x_{ij}^{(d)} = \begin{cases} \text{NaN} & \text{if } x_{ij} \ge Q_{1-d}(x_j) \\ x_{ij} & \text{otherwise} \end{cases}$$
+
 
 ### Noise & Bias Models
 * **Feature Noise (Measurement Error):** Simulates sensor inaccuracy.
+
   $$x_i^{(d)} = x_i + \epsilon, \quad \epsilon \sim \mathcal{N}(0, \sigma_d^2 I)$$
+
 * **Label Noise:** Simulates human entry errors or mislabeling.
+
   $$y_i^{(d)} = \begin{cases} \text{Uniform}(\{1, \dots, K\}) & \text{w.p. } \eta_d \\ y_i & \text{otherwise} \end{cases}$$
+
 * **Structural Bias:** Asymmetric reliability failure where some groups are affected more than others.
+
   $$P(\mathcal{T}_d(x) \mid y=k_1) \neq P(\mathcal{T}_d(x) \mid y=k_2)$$
+
 
 ---
 
