@@ -85,7 +85,9 @@ To evaluate this claim, we define the following mathematical objects:
 **1. The Prediction ($\hat{y}_i$)**
 The model selects the class with the highest predicted probability:
 
-![Prediction](https://latex.codecogs.com/svg.image?\hat{y}_i=\arg\max_k\hat{p}_{ik})
+<p align="center">
+  <img src="https://latex.codecogs.com/svg.image?\hat{y}_i=\arg\max_k\hat{p}_{ik}" alt="Prediction Equation">
+</p>
 
 **2. The Confidence Score ($c_i$)**
 The confidence associated with that prediction is the magnitude of the maximum predicted probability:
@@ -117,7 +119,9 @@ This allows confidence (a probabilistic belief) to be compared against correctne
 **1. The Correctness Indicator ($z_i$)**
 We define a binary variable to represent the accuracy of a single prediction:
 
-$$z_i = \begin{cases} 1 & \text{if } \hat{y}_i = y_i \\ 0 & \text{otherwise} \end{cases}$$
+<p align="center">
+  <img src="https://latex.codecogs.com/svg.image?z_i%3D%5Cbegin%7Bcases%7D1%26%5Ctext%7B%20if%20%7D%5Chat%7By%7D_i%3Dy_i%5C%5C0%26%5Ctext%7B%20otherwise%7D%5Cend%7Bcases%7D" alt="Correctness Equation">
+</p>
 
 **2. The Statistical Nature of Correctness**
 Correctness is treated as a **Bernoulli** random variable, allowing confidence (a probabilistic belief) to be compared against correctness (a binary outcome) mathematically:
@@ -240,7 +244,9 @@ To ensure the results are not artifacts of randomness, we apply rigorous statist
 ### Bootstrap Confidence Intervals (CI)
 We estimate the uncertainty of our metrics by resampling the data and calculating the 95% confidence interval using the 2.5th and 97.5th percentiles of the bootstrap distribution:
 
-![Bootstrap](https://latex.codecogs.com/svg.image?\mathrm{CI}_{95\%}=[Q_{0.025},Q_{0.975}])
+<p align="center">
+  <img src="https://latex.codecogs.com/svg.image?\mathrm{CI}_{95\%}=[Q_{0.025},Q_{0.975}]" alt="Bootstrap Equation">
+</p>
 
 
 ### Monotonicity of Failure
