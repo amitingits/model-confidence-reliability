@@ -282,7 +282,7 @@ We study this relationship as $d \uparrow$ (severity increases) to determine the
 
 > **Project Mission:** To measure when and why machine learning models stop being honest about their own uncertainty as data quality deteriorates.
 
-## 14. Why This Project Matters
+## 13. Why This Project Matters
 
 Because in real systems:
 
