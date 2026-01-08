@@ -238,7 +238,8 @@ To ensure the results are not artifacts of randomness, we apply rigorous statist
 ### Bootstrap Confidence Intervals (CI)
 We estimate the uncertainty of our metrics by resampling the data and calculating the 95% confidence interval using the 2.5th and 97.5th percentiles of the bootstrap distribution:
 
-$$\mathrm{CI}_{95\%} = [Q_{0.025}, Q_{0.975}]$$
+![Bootstrap](https://latex.codecogs.com/svg.image?\mathrm{CI}_{95\%}=[Q_{0.025},Q_{0.975}])
+
 
 ### Monotonicity of Failure
 We measure the relationship between the severity of degradation ($d$) and the increase in Calibration Error using the Spearman rank correlation coefficient:
